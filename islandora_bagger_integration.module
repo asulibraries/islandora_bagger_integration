@@ -14,13 +14,14 @@ function islandora_bagger_integration_islandora_bagger_config_file_contents_alte
      // Last one wins.
      $options = $reaction->execute();
    }
-   $options_array = preg_split("/\\r\\n|\\r|\\n/", $options);
    $options_from_context = array();
-   foreach ($options_array as $option) {
-     list($option_key, $option_value) = explode(':', $option, 2);
-     $options_from_context[trim($option_key)] = trim($option_value);
+   if (isset($options)) {
+     $options_array = preg_split("/\\r\\n|\\r|\\n/", $options);
+     foreach ($options_array as $option) {
+       list($option_key, $option_value) = explode(':', $option, 2);
+       $options_from_context[trim($option_key)] = trim($option_value);
+     }
    }
-
    $config =  Yaml::parse($config_file_contents);
    foreach ($options_from_context as $key => $value) {
      // Skip options that have lists as values, process them below.
@@ -38,11 +39,13 @@ function islandora_bagger_integration_islandora_bagger_config_file_contents_alte
    }
 
    // Handle 'plugins' separately since its value is a list of strings.
-   foreach ($skip_keys as $key) {
-     if ($key != 'bag-info') {
-       if (array_key_exists($key, $config) && array_key_exists($key, $options_from_context)
-         && strlen($options_from_context[$key])) {
-         $config = $utils->addListConfigOptions($config, $key, $options_from_context[$key]);
+   if (isset($skip_keys)) {
+     foreach ($skip_keys as $key) {
+       if ($key != 'bag-info') {
+         if (array_key_exists($key, $config) && array_key_exists($key, $options_from_context)
+           && strlen($options_from_context[$key])) {
+           $config = $utils->addListConfigOptions($config, $key, $options_from_context[$key]);
+         }
        }
      }
    }

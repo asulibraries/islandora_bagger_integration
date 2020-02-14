@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\islandora\Plugin\Action;
+namespace Drupal\islandora_bagger_integration\Plugin\Action;
 
 use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -12,12 +12,12 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
 /**
- * Deletes a media and its source file.
+ * Create a bag of a node.
  *
  * @Action(
- *   id = "delete_media_and_file",
- *   label = @Translation("Delete media and file"),
- *   type = "media"
+ *   id = "bag_node",
+ *   label = @Translation("Bag a node"),
+ *   type = "node"
  * )
  */
 class BagNode extends ActionBase implements ContainerFactoryPluginInterface {
@@ -79,7 +79,7 @@ class BagNode extends ActionBase implements ContainerFactoryPluginInterface {
     $config = \Drupal::config('islandora_bagger_integration.settings');
     $mode = $config->get('islandora_bagger_mode');
     $node = $entity;
-    \Drupal::logger('islandora bagger')->info('the node title is '. $node->getTitle());
+    $nid = $node->id();
 
     if ($mode == 'local') {
       $title = $node->getTitle();
@@ -189,8 +189,7 @@ class BagNode extends ActionBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
-    $result = AccessResult::allowed();
-    return $return_as_object ? $result : $result->isAllowed();
+    return $object->access('edit', $account, $return_as_object);
   }
 
 }
